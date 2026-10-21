@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "yunmail"
+version = "0.1.0"
+description = "Official Python SDK for the Yunmail cloud communications API — email, SMS, voice verification and push notifications through one unified API."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Yunmail Maintainers" }]
+keywords = ["yunmail", "email-api", "sms-api", "voice-otp", "push-notifications", "cloud-communications"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3",
+  "Topic :: Communications :: Email",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://www.yunmail.cc.cd"
+Documentation = "https://www.yunmail.cc.cd"
+Issues = "https://github.com/tanxi281-sketch/yunmail-sdk/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
