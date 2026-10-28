@@ -82,6 +82,52 @@ class ErrorMappingTest(unittest.TestCase):
         self.assertEqual(result.id, "v1")
 
 
+class BatchAndEnvTest(unittest.TestCase):
+    def test_send_email_includes_cc_bcc_reply_to(self):
+        client, transport = make_client([(200, {"id": "m2", "status": "queued"})])
+        client.send_email(
+            "a@example.com",
+            "Hi",
+            text="hello",
+            cc=["c@example.com"],
+            bcc=["b@example.com"],
+            reply_to="r@example.com",
+        )
+        payload = json.loads(transport.requests[0][3].decode("utf-8"))
+        self.assertEqual(payload["cc"], ["c@example.com"])
+        self.assertEqual(payload["bcc"], ["b@example.com"])
+        self.assertEqual(payload["reply_to"], "r@example.com")
+
+    def test_send_email_batch_sends_per_recipient(self):
+        client, transport = make_client(
+            [(200, {"id": "m1", "status": "queued"}), (200, {"id": "m2", "status": "queued"})]
+        )
+        results = client.send_email_batch(
+            ["a@example.com", "b@example.com"], subject="News", text="hello"
+        )
+        self.assertEqual([r.id for r in results], ["m1", "m2"])
+        self.assertEqual(len(transport.requests), 2)
+
+    def test_send_sms_batch(self):
+        client, transport = make_client(
+            [(200, {"id": "s1", "status": "sent"}), (200, {"id": "s2", "status": "sent"})]
+        )
+        results = client.send_sms_batch(["+1", "+2"], content="alert")
+        self.assertEqual([r.id for r in results], ["s1", "s2"])
+        self.assertEqual(len(transport.requests), 2)
+
+    def test_from_env(self):
+        import os
+        from unittest import mock
+
+        with mock.patch.dict(os.environ, {"YUNMAIL_API_KEY": "env-key"}):
+            client = YunmailClient.from_env(transport=FakeTransport([]))
+        self.assertEqual(client.api_key, "env-key")
+        with mock.patch.dict(os.environ, {}, clear=True):
+            with self.assertRaises(ValueError):
+                YunmailClient.from_env()
+
+
 class WebhookTest(unittest.TestCase):
     def test_verify_webhook(self):
         import hashlib
