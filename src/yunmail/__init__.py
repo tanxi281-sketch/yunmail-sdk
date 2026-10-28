@@ -13,7 +13,7 @@ from .errors import (
 )
 from .models import MessageResult
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 __all__ = [
     "YunmailClient",

@@ -12,6 +12,7 @@ body)``.
 import hashlib
 import hmac
 import json
+import os
 import time
 import urllib.error
 import urllib.request
@@ -63,11 +64,28 @@ class YunmailClient:
         if not api_key:
             raise ValueError("api_key is required")
         self.api_key = api_key
+
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
         self.max_retries = max_retries
         self._transport = transport or _urllib_transport
         self._sleeper = sleeper
+
+    @classmethod
+    def from_env(cls, **kwargs) -> "YunmailClient":
+        """Create a client from environment variables.
+
+        Reads ``YUNMAIL_API_KEY`` (required) and ``YUNMAIL_BASE_URL``
+        (optional). Extra keyword arguments are passed to the constructor.
+        """
+        api_key = os.environ.get("YUNMAIL_API_KEY")
+        if not api_key:
+            raise ValueError("YUNMAIL_API_KEY environment variable is not set")
+        kwargs.setdefault("api_key", api_key)
+        base_url = os.environ.get("YUNMAIL_BASE_URL")
+        if base_url:
+            kwargs.setdefault("base_url", base_url)
+        return cls(**kwargs)
 
     # ------------------------------------------------------------------
     # Channels
@@ -79,6 +97,9 @@ class YunmailClient:
         html: Optional[str] = None,
         text: Optional[str] = None,
         from_addr: Optional[str] = None,
+        cc: Optional[Sequence[str]] = None,
+        bcc: Optional[Sequence[str]] = None,
+        reply_to: Optional[str] = None,
         tags: Optional[Sequence[str]] = None,
     ) -> MessageResult:
         """Send a transactional or marketing email."""
@@ -91,9 +112,36 @@ class YunmailClient:
             payload["text"] = text
         if from_addr is not None:
             payload["from"] = from_addr
+        if cc:
+            payload["cc"] = list(cc)
+        if bcc:
+            payload["bcc"] = list(bcc)
+        if reply_to is not None:
+            payload["reply_to"] = reply_to
         if tags:
             payload["tags"] = list(tags)
         return self._send("/email/send", payload, channel="email")
+
+    def send_email_batch(
+        self, recipients: Iterable[str], **kwargs
+    ) -> "list[MessageResult]":
+        """Send the same email to many recipients, one send per recipient.
+
+        Convenience wrapper around :meth:`send_email`; keyword arguments
+        (subject, html/text, from_addr, cc, bcc, reply_to, tags) are shared
+        by every send. Returns one result per recipient, in order.
+        """
+        return [self.send_email(to=r, **kwargs) for r in recipients]
+
+    def send_sms_batch(
+        self, recipients: Iterable[str], **kwargs
+    ) -> "list[MessageResult]":
+        """Send the same SMS to many recipients, one send per recipient.
+
+        Convenience wrapper around :meth:`send_sms`; keyword arguments
+        (content or template_id/params) are shared by every send.
+        """
+        return [self.send_sms(to=r, **kwargs) for r in recipients]
 
     def send_sms(
         self,
@@ -171,7 +219,7 @@ class YunmailClient:
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json",
             "Accept": "application/json",
-            "User-Agent": "yunmail-python/0.1.0",
+            "User-Agent": "yunmail-python/0.1.1",
         }
         body = json.dumps(payload).encode("utf-8") if payload is not None else None
 
