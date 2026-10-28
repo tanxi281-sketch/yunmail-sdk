@@ -6,11 +6,14 @@
 - [x] Webhook HMAC-SHA256 signature verification
 - [x] Unit tests with an injectable transport (no network needed)
 
+## 0.1.1
+- [x] Published to PyPI (`pip install yunmail`)
+- [x] Batch sending helpers for email and SMS
+- [x] `YunmailClient.from_env()` and email cc/bcc/reply_to support
+
 ## Next
-- [ ] Publish to PyPI (`pip install yunmail`)
 - [ ] Async client (`asyncio`) alongside the sync client
 - [ ] Template management endpoints (list / create / delete)
-- [ ] Batch sending helpers for email and SMS
 - [ ] Delivery analytics queries (rates, failure attribution)
 - [ ] Node.js SDK in a sibling repository
 

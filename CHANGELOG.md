@@ -3,6 +3,15 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.1.1] - 2026-10-21
+
+### Added
+- `YunmailClient.from_env()` — build a client from the
+  `YUNMAIL_API_KEY` / `YUNMAIL_BASE_URL` environment variables.
+- `send_email_batch()` and `send_sms_batch()` convenience helpers that
+  send the same message to many recipients, one send per recipient.
+- `send_email()` now accepts `cc`, `bcc` and `reply_to`.
+
 ## [0.1.0] - 2026-10-21
 
 ### Added

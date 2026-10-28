@@ -11,7 +11,7 @@ notifications through one unified API**, with a single API key.
 - 🔐 HMAC-SHA256 webhook signature verification built in
 - 🚀 Zero dependencies — Python standard library only
 
-> Status: **0.1.0 (alpha)**. The API surface covers the four core send
+> Status: **0.1.1 (alpha)**. The API surface covers the four core send
 > channels plus delivery-status lookup. See [ROADMAP.md](ROADMAP.md).
 
 ## Installation
